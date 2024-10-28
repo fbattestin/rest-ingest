@@ -19,6 +19,10 @@ The **REST Ingest Data API** is a FastAPI-based solution for managing data inges
 - **GET** /api/v1/contract/get/{contract_name}: Retrieves contract details.
 - **GET** /api/v1/health: Health check endpoint.
 
+## API Flow (Draft)
+![Untitled diagram-2024-10-28-145704](https://github.com/user-attachments/assets/89a11db4-062d-4044-b097-02e2d5859e31)
+
+
 ## How to Run
 
 1. Clone the repository and install dependencies from `requirements.txt`.
