@@ -1,0 +1,21 @@
+# Ignorar a pasta do ambiente virtual
+venv/
+
+# Arquivos do Python
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# Arquivos de configuração locais
+*.env
+.env
+
+# Arquivos do editor/IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Outros
+.DS_Store
