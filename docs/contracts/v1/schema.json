@@ -1,0 +1,161 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "Data Contract Schema",
+    "type": "object",
+    "properties": {
+      "data_contract": {
+        "type": "object",
+        "properties": {
+          "version": {
+            "type": "string",
+            "pattern": "^\\d+\\.\\d+$"
+          },
+          "metadata": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "owner": { "type": "string", "format": "email" },
+              "created_at": { "type": "string", "format": "date-time" },
+              "updated_at": { "type": "string", "format": "date-time" },
+              "tags": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            },
+            "required": ["name", "description", "owner", "created_at", "updated_at"]
+          },
+          "schemas": {
+            "type": "object",
+            "properties": {
+              "structured": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "description": { "type": "string" },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "type": { "type": "string" },
+                          "description": { "type": "string" },
+                          "required": { "type": "boolean" }
+                        },
+                        "required": ["name", "type", "description", "required"]
+                      }
+                    }
+                  },
+                  "required": ["name", "description", "fields"]
+                }
+              },
+              "semi_structured": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "description": { "type": "string" },
+                    "fields": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "name": { "type": "string" },
+                          "type": { "type": "string" },
+                          "description": { "type": "string" },
+                          "required": { "type": "boolean" }
+                        },
+                        "required": ["name", "type", "description", "required"]
+                      }
+                    }
+                  },
+                  "required": ["name", "description", "fields"]
+                }
+              }
+            },
+            "required": ["structured", "semi_structured"]
+          },
+          "storage": {
+            "type": "object",
+            "properties": {
+              "destinations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "description": { "type": "string" },
+                    "details": {
+                      "type": "object",
+                      "additionalProperties": true
+                    }
+                  },
+                  "required": ["name", "description", "details"]
+                }
+              }
+            },
+            "required": ["destinations"]
+          },
+          "validation": {
+            "type": "object",
+            "properties": {
+              "rules": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "name": { "type": "string" },
+                    "description": { "type": "string" },
+                    "type": { "type": "string" },
+                    "pattern": { "type": "string" }
+                  },
+                  "required": ["name", "description", "type", "pattern"]
+                }
+              }
+            },
+            "required": ["rules"]
+          },
+          "security": {
+            "type": "object",
+            "properties": {
+              "encryption": {
+                "type": "object",
+                "properties": {
+                  "enabled": { "type": "boolean" },
+                  "type": { "type": "string" }
+                },
+                "required": ["enabled", "type"]
+              },
+              "access_control": {
+                "type": "object",
+                "properties": {
+                  "roles": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "name": { "type": "string" },
+                        "permissions": {
+                          "type": "array",
+                          "items": { "type": "string" }
+                        }
+                      },
+                      "required": ["name", "permissions"]
+                    }
+                  }
+                },
+                "required": ["roles"]
+              }
+            },
+            "required": ["encryption", "access_control"]
+          }
+        },
+        "required": ["version", "metadata", "schemas", "storage", "validation", "security"]
+      }
+    },
+    "required": ["data_contract"]
+  }

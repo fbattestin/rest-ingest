@@ -1,4 +1,4 @@
 from .contract import *
-from .data import *
+from .data.data import *
 from .schema import *
 from .health import *

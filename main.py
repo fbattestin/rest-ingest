@@ -1,5 +1,6 @@
+from api.v1.endpoints.data import data
 from fastapi import FastAPI
-from api.v1.endpoints import data, schema, contract, health
+from api.v1.endpoints import schema, contract, health
 from common.utils import setup_logging, init_db
 
 logger = setup_logging()

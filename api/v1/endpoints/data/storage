@@ -1,0 +1,120 @@
+import os
+import boto3
+from abc import ABC, abstractmethod
+import aiofiles
+import aioboto3
+
+
+class Storage(ABC):
+    @abstractmethod
+    def save(self, filename, data):
+        pass
+
+    @abstractmethod
+    def load(self, filename):
+        pass
+
+class S3Storage(Storage):
+    """
+    S3Storage is a class for interacting with AWS S3 storage using aioboto3.
+    """
+
+    register = 's3-storage'
+
+    def __init__(self, **kwargs):
+        self._properties = kwargs
+        
+        self.bucket_name = self._properties.get('bucket_name')
+        self.aws_access_key_id = self._properties.get('aws_access_key_id')
+        self.aws_secret_access_key = self._properties.get('aws_secret_access_key')
+        self.region_name = self._properties.get('region_name')
+        self.s3 = aioboto3.client(
+            's3',
+            aws_access_key_id=self.aws_access_key_id,
+            aws_secret_access_key=self.aws_secret_access_key,
+            region_name=self.region_name
+        )
+
+    @property
+    def properties(self):
+        return self._properties
+
+    @properties.setter
+    async def properties(self, value):
+        self._properties = value
+        self.bucket_name = self._properties.get('bucket_name')
+        self.aws_access_key_id = self._properties.get('aws_access_key_id')
+        self.aws_secret_access_key = self._properties.get('aws_secret_access_key')
+        self.region_name = self._properties.get('region_name')
+        self.s3 = aioboto3.client(
+            's3',
+            aws_access_key_id=self.aws_access_key_id,
+            aws_secret_access_key=self.aws_secret_access_key,
+            region_name=self.region_name
+        )
+
+    async def save(self, filename, data):
+        """"
+        Asynchronously saves data to a file in the S3 bucket.
+
+        Args:
+            filename (str): The name of the file to save the data to.
+            data (bytes): The data to save to the file.
+        """
+
+        async with self.s3 as s3_client:
+            await s3_client.put_object(Bucket=self.bucket_name, Key=filename, Body=data)
+
+    async def load(self, filename):
+        """"
+        Asynchronously loads data from a file in the S3 bucket.
+        
+        Args:
+            filename (str): The name of the file to load the data from.
+        """
+        async with self.s3 as s3_client:
+            response = await s3_client.get_object(Bucket=self.bucket_name, Key=filename)
+            return await response['Body'].read()
+
+class LocalStorage(Storage):
+    """
+    LocalStorage is a class that provides methods to save and load data to and from a local directory.
+    """
+    register = 'local-storage'
+
+    def __init__(self, **kwargs):
+        self._properties = kwargs
+        self.directory = self._properties.get('directory', 'files')
+
+    @property
+    def properties(self):
+        return self._properties
+
+    @properties.setter
+    async def properties(self, value):
+        self._properties = value
+        if not os.path.exists(self.directory):
+            await aiofiles.os.makedirs(self.directory)
+
+    async def save(self, filename, data):
+        """"
+        Asynchronously saves data to a file in the specified directory. 
+        
+        Args:
+            filename (str): The name of the file to save the data to.
+            data (bytes): The data to save to the file.
+        """
+
+        async with aiofiles.open(os.path.join(self.directory, filename), 'wb') as file:
+            await file.write(data)
+
+    async def load(self, filename):
+        """"
+        Asynchronously loads data from a file in the specified directory.
+        
+        Args:
+            filename (str): The name of the file to load the data from.
+        """
+        
+        async with aiofiles.open(os.path.join(self.directory, filename), 'rb') as file:
+            return await file.read()

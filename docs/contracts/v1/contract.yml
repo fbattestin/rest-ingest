@@ -1,0 +1,96 @@
+data_contract:
+  version: 1.0
+  metadata:
+    name: "Example Data Contract"
+    description: "A contract for structured and semi-structured data ingestion"
+    owner: "data-team@example.com"
+    created_at: "2023-10-01T00:00:00Z"
+    updated_at: "2023-10-01T00:00:00Z"
+    tags:
+      - "data-ingestion"
+      - "scalable"
+      - "structured"
+      - "semi-structured"
+
+  schemas:
+    structured:
+      - name: "User"
+        description: "Schema for user data"
+        fields:
+          - name: "user_id"
+            type: "string"
+            description: "Unique identifier for the user"
+            required: true
+          - name: "email"
+            type: "string"
+            description: "Email address of the user"
+            required: true
+          - name: "created_at"
+            type: "datetime"
+            description: "Timestamp when the user was created"
+            required: true
+
+    semi_structured:
+      - name: "Event"
+        description: "Schema for event data"
+        fields:
+          - name: "event_id"
+            type: "string"
+            description: "Unique identifier for the event"
+            required: true
+          - name: "event_type"
+            type: "string"
+            description: "Type of the event"
+            required: true
+          - name: "payload"
+            type: "json"
+            description: "Payload of the event"
+            required: true
+          - name: "timestamp"
+            type: "datetime"
+            description: "Timestamp when the event occurred"
+            required: true
+
+  storage:
+    destinations:
+      - name: "s3"
+        description: "Amazon S3 storage"
+        details:
+          bucket_name: "example-bucket"
+          region: "us-west-2"
+      - name: "local"
+        description: "Local file system storage"
+        details:
+          directory: "/data/files"
+      - name: "queue"
+        description: "Message queue storage"
+        details:
+          queue_name: "example-queue"
+          provider: "aws-sqs"
+
+  validation:
+    rules:
+      - name: "email_format"
+        description: "Ensure email addresses are valid"
+        type: "regex"
+        pattern: "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$"
+      - name: "timestamp_format"
+        description: "Ensure timestamps are in ISO 8601 format"
+        type: "regex"
+        pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$"
+
+  security:
+    encryption:
+      enabled: true
+      type: "AES256"
+    access_control:
+      roles:
+        - name: "admin"
+          permissions:
+            - "read"
+            - "write"
+            - "delete"
+        - name: "user"
+          permissions:
+            - "read"
+            - "write"

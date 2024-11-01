@@ -3,7 +3,7 @@ Endpoints for data ingestion in the API.
 """
 from fastapi import APIRouter, HTTPException, Header, Depends
 from models.payload import DataPayload
-from .contract import get_contract
+from ..contract import get_contract
 from api.dependencies.redis import get_redis
 from api.dependencies.validation import validate_contract
 from common.utils import setup_logging, get_tracking_id
@@ -14,13 +14,12 @@ logger = setup_logging()
 
 router = APIRouter()
 
-
 @router.post("/ingest", summary="Data Ingestion", response_description="Ingestion confirmation")
 async def ingest_data(
     payload: DataPayload,
     x_contract_name: str = Header(..., alias="X-Contract-Name"),
     x_contract_version: str = Header(..., alias="X-Contract-Version"),
-    # redis=Depends(get_redis)
+    redis=Depends(get_redis)
 ) -> dict:
     """
     Endpoint for data ingestion.
@@ -34,24 +33,34 @@ async def ingest_data(
     logger.info(f"Contract: {contract}")
 
     idempotency_key = get_tracking_id()
-    # await redis.set(idempotency_key, str(payload.dict()), ex=3600)
+    await store_data_in_redis(redis, idempotency_key, payload)
+    await handle_data_destination(contract, idempotency_key, payload)
+
+    logger.info("Data ingestion process completed successfully")
+    return {"status": "success", "tracking_id": idempotency_key}
+
+
+async def store_data_in_redis(redis, idempotency_key, payload):
+    await redis.set(idempotency_key, str(payload.dict()), ex=3600)
     logger.info(f"Data stored in Redis with idempotency key: {idempotency_key}")
 
-    # factory calls here
+
+async def handle_data_destination(contract, idempotency_key, payload):
     destination = contract["contract_details"]["dest"]
     logger.info(f"Contract Destination: {destination}")
+
     if destination == "queue":
         logger.info("Data will be sent to queue")
-        pass
+        # Implement queue logic here
     elif destination == "cold_storage":
         logger.info("Data will be sent to cold storage")
         upload_to_s3(file_name=f"payload_{idempotency_key}.json", data=str(payload.dict()).encode())
     elif destination == "s3":
         logger.info(f"Data will be sent to S3://..../....")
+        # Implement S3 logic here
     elif destination == "local":
         logger.info(f"Saving file local: {idempotency_key}.json")
-        logger.info("Data ingestion process completed successfully")
-        return {"status": "success", "tracking_id": idempotency_key}
+        # Implement local storage logic here
     else:
         raise NotImplementedError("Ingest method not implemented yet.")
 
